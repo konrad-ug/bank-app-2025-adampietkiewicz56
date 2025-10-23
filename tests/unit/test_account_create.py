@@ -47,3 +47,6 @@ class TestAccount:
     def test_notsenior_promo(self):
         acc = Account("John", "Doe", "04290000000", "PROM_KOD")
         assert acc.balance == 50    
+
+
+

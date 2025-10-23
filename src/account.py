@@ -19,4 +19,18 @@ class Account:
             return
 
         if self.promo_code and self.promo_code.startswith("PROM_"):
-            self.balance += 50
+            self.balance += 50.0
+
+    def outgoing_transfer(self, amount):
+        if amount <= 0 or amount > self.balance:
+            return
+
+        self.balance -= amount
+        
+    
+
+    def incoming_transfer(self, amount):
+        if amount <= 0:
+            return
+        else:
+            self.balance += amount
