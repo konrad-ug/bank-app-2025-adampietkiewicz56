@@ -39,3 +39,11 @@ class TestAccount:
     def test_account_with_none_as_promo_code(self):
         acc = Account("Ewa", "Nowak", "90010112345", promo_code=None)
         assert acc.balance == 0
+
+    def test_senior_nopromo(self):
+        acc = Account("John", "Doe", "60011111111", "PROM_KOD")
+        assert acc.balance == 0
+
+    def test_notsenior_promo(self):
+        acc = Account("John", "Doe", "04290000000", "PROM_KOD")
+        assert acc.balance == 50    
