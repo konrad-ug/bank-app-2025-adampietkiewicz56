@@ -23,8 +23,11 @@ class PersonalAccount(Account):
         if self.promo_code and self.promo_code.startswith("PROM_"):
             self.balance += 50.0
 
-    def send_personal_express_transfer(self, amount):
-        fee = 1.00
+    def express_outgoing_pers(self, amount):
+        fee = 1.0
+        total_amount = amount + fee
+        if (amount > 0 and total_amount <= self.balance + fee):
+            self.balance -= total_amount
         
 
 
