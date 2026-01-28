@@ -1,15 +1,32 @@
 import pytest
+from unittest.mock import patch, MagicMock
 from src.company_account import CompanyAccount
+
+
+@pytest.fixture
+def mock_mf_api():
+    """Fixture: Mock API Ministerstwa Finansów - statusVat: Czynny"""
+    with patch('src.company_account.requests.get') as mock_get:
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "result": {
+                "subject": {"statusVat": "Czynny", "nip": "1234567890"}
+            }
+        }
+        mock_response.text = '{"result": {"subject": {"statusVat": "Czynny"}}}'
+        mock_get.return_value = mock_response
+        yield mock_get
 
 
 class TestCompanyAccountLoan:
 
     @pytest.fixture
-    def company_account(self):
+    def company_account(self, mock_mf_api):
         return CompanyAccount("TechCorp", "1234567890")
     
     @pytest.fixture
-    def account_with_zus_payment(self):
+    def account_with_zus_payment(self, mock_mf_api):
         account = CompanyAccount("TechCorp", "1234567890")
         account.balance = 10000.0
         account.outgoing_transfer(1775.0) # wpłata do zus
@@ -69,7 +86,7 @@ class TestCompanyAccountLoan:
         assert result is False
         assert company_account.balance == 2000.0
 
-    def test_loan_zus_payment_exact_amount(self):
+    def test_loan_zus_payment_exact_amount(self, mock_mf_api):
         #Warunek ZUS musi być dokładnie -1775
         account = CompanyAccount("TechCorp", "1234567890")
         account.balance = 10000.0

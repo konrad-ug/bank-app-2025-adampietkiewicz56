@@ -1,0 +1,17 @@
+[run]
+branch = True
+
+[report]
+# Wyłącz CompanyAccount z code coverage (Feature 18)
+omit =
+    */company_account.py
+    */site-packages/*
+
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod
