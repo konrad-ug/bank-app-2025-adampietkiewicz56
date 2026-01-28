@@ -6,7 +6,7 @@ name: Adam
 
 surname: Pietkiewicz
 
-group:
+group: 2
 
 ## How to start the app
 
