@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: Unit tests
+name: Tests (Unit + API)
 
 on:
   push:
@@ -29,10 +29,23 @@ jobs:
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Start API server
+    - name: Start Flask API server in background
       run: |
-        python app.py &
+        nohup python -m flask --app app/api.py run --host 127.0.0.1 --port 5000 > flask.log 2>&1 &
+        echo "Flask server starting..."
         sleep 5
+        echo "Checking if Flask is running..."
+        for i in {1..15}; do
+          if curl -s -f http://127.0.0.1:5000/api/accounts > /dev/null 2>&1; then
+            echo "✓ Flask server is ready!"
+            break
+          fi
+          echo "Attempt $i/15: Waiting for Flask..."
+          sleep 2
+        done
+        echo "Flask log:"
+        cat flask.log || echo "No log file"
+        curl -v http://127.0.0.1:5000/api/accounts || echo "Flask not responding"
 
     - name: Lint with flake8
       run: |
