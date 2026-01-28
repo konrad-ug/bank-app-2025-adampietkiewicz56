@@ -26,3 +26,10 @@ class AccountRegistry:
                 self.accounts.remove(account)
                 return True
         return False
+
+    def account_with_pesel_exists(self, pesel: str) -> bool:
+        """Sprawdza czy w rejestrze istnieje konto z podanym PESEL"""
+        for account in self.accounts:
+            if account.pesel == pesel:
+                return True
+        return False

@@ -194,3 +194,54 @@ class TestAccountCRUD:
         # 6. READ after delete (404)
         get_response3 = requests.get(f"{base_url}/{pesel}")
         assert get_response3.status_code == 404
+
+    # ========== FEATURE 16 - Unikalny PESEL ==========
+
+    def test_create_account_duplicate_pesel_returns_409(self, base_url):
+        """Test: POST z duplikatowym PESEL zwraca 409 Conflict (Feature 16)"""
+        pesel = "88888888888"
+
+        # Stwórz pierwsze konto
+        response1 = requests.post(base_url, json={
+            "name": "John",
+            "surname": "Doe",
+            "pesel": pesel
+        })
+        assert response1.status_code == 201
+
+        # Spróbuj stworzyć drugie z tym samym PESEL
+        response2 = requests.post(base_url, json={
+            "name": "Jane",
+            "surname": "Doe",
+            "pesel": pesel
+        })
+        assert response2.status_code == 409  # ← KONFLIKT
+        assert "already exists" in response2.json()["error"]
+
+    def test_create_account_duplicate_pesel_multiple_attempts(self, base_url):
+        """Test: Kilka prób stworzenia konta z tym samym PESEL"""
+        pesel = "87654321098"
+
+        # Stwórz konto
+        response1 = requests.post(base_url, json={
+            "name": "First",
+            "surname": "Person",
+            "pesel": pesel
+        })
+        assert response1.status_code == 201
+
+        # Spróbuj jeszcze raz z innym imieniem
+        response2 = requests.post(base_url, json={
+            "name": "Second",
+            "surname": "Person",
+            "pesel": pesel
+        })
+        assert response2.status_code == 409
+
+        # I jeszcze raz
+        response3 = requests.post(base_url, json={
+            "name": "Third",
+            "surname": "Person",
+            "pesel": pesel
+        })
+        assert response3.status_code == 409
