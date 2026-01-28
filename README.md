@@ -2,9 +2,9 @@
 # Bank-app
 
 ## Author:
-name:
+name: Adam
 
-surname:
+surname: Pietkiewicz
 
 group:
 
