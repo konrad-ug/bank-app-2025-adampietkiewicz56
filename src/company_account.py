@@ -100,3 +100,27 @@ class CompanyAccount(Account):
         # Wyślij email przez SMTP client
         smtp_client = SMTPClient()
         return smtp_client.send(subject, text, email_address)
+    
+    def to_dict(self):
+        """Konwertuje konto do słownika dla MongoDB"""
+        return {
+            "type": "company",
+            "company_name": self.company_name,
+            "nip": self.nip,
+            "balance": self.balance,
+            "history": self.history
+        }
+    
+    @staticmethod
+    def from_dict(data):
+        """Tworzy CompanyAccount ze słownika"""
+        # Tworzymy konto z wymuszonym pominięciem walidacji NIP (dane z bazy są zaufane)
+        account = object.__new__(CompanyAccount)
+        Account.__init__(account)  # Inicjalizujemy bazową klasę Account
+        
+        account.company_name = data["company_name"]
+        account.nip = data["nip"]
+        account.balance = data["balance"]
+        account.history = data["history"]
+        
+        return account

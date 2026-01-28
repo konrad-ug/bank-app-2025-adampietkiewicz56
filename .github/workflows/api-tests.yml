@@ -27,6 +27,11 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     
+    - name: Start mongo
+      run: |
+        docker compose -f mongo.yml up -d
+        sleep 3
+    
     - name: Start flask
       run: |
         export FLASK_APP=app/api.py

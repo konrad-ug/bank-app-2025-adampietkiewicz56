@@ -79,3 +79,29 @@ class PersonalAccount(Account):
         # Wyślij email przez SMTP client
         smtp_client = SMTPClient()
         return smtp_client.send(subject, text, email_address)
+    
+    def to_dict(self):
+        """Konwertuje konto do słownika dla MongoDB"""
+        return {
+            "type": "personal",
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "pesel": self.pesel,
+            "balance": self.balance,
+            "history": self.history,
+            "promo_code": self.promo_code
+        }
+    
+    @staticmethod
+    def from_dict(data):
+        """Tworzy PersonalAccount z słownika"""
+        account = PersonalAccount(
+            first_name=data["first_name"],
+            last_name=data["last_name"],
+            pesel=data["pesel"],
+            promo_code=data.get("promo_code")
+        )
+        # Nadpisz balance i history (bez wywoływania apply_promo ponownie)
+        account.balance = data["balance"]
+        account.history = data["history"]
+        return account

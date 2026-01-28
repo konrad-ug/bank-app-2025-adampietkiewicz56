@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
 from src.account_registry import AccountRegistry
 from src.personal_account import PersonalAccount
+from src.mongo_repository import MongoAccountsRepository
 
 app = Flask(__name__)
 registry = AccountRegistry()
+mongo_repo = MongoAccountsRepository()
 @app.route("/api/accounts", methods=['POST'])
 def create_account():
     data = request.get_json()
@@ -123,6 +125,38 @@ def transfer(pesel):
             return jsonify({
                 "error": "This account type does not support express transfers"
             }), 400
+
+@app.route("/api/accounts/save", methods=['POST'])
+def save_accounts():
+    """Zapisuje wszystkie konta z registry do MongoDB"""
+    try:
+        accounts = registry.get_all_accounts()
+        mongo_repo.save_all(accounts)
+        return jsonify({
+            "message": f"Successfully saved {len(accounts)} accounts to database"
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/accounts/load", methods=['POST'])
+def load_accounts():
+    """Ładuje wszystkie konta z MongoDB do registry"""
+    try:
+        # Czyścimy obecne konta przed załadowaniem
+        registry._accounts = []
+        
+        # Ładujemy z bazy
+        accounts = mongo_repo.load_all()
+        
+        # Dodajemy do registry
+        for account in accounts:
+            registry.add_account(account)
+        
+        return jsonify({
+            "message": f"Successfully loaded {len(accounts)} accounts from database"
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000)
