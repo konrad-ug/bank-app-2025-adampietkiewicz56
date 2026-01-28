@@ -1,4 +1,5 @@
 from src.account import Account
+from smtp.smtp import SMTPClient
 import requests
 import os
 from datetime import datetime
@@ -78,3 +79,24 @@ class CompanyAccount(Account):
             self.balance += amount
             return True
         return False
+    
+    def send_history_via_email(self, email_address: str) -> bool:
+        """
+        Wysyła historię konta na podany adres email (Feature 19)
+        
+        Args:
+            email_address: Adres email odbiorcy
+            
+        Returns:
+            True jeśli wysłanie się powiodło, False w przeciwnym razie
+        """
+        # Przygotuj datę w formacie YYYY-MM-DD
+        today = datetime.now().strftime("%Y-%m-%d")
+        
+        # Przygotuj temat i treść maila
+        subject = f"Account Transfer History {today}"
+        text = f"Company account history: {self.history}"
+        
+        # Wyślij email przez SMTP client
+        smtp_client = SMTPClient()
+        return smtp_client.send(subject, text, email_address)
