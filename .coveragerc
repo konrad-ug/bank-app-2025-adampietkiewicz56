@@ -3,8 +3,10 @@ branch = True
 
 [report]
 # Wyłącz CompanyAccount z code coverage (Feature 18)
+# Wyłącz smtp/ z coverage (Feature 19 - stub)
 omit =
     */company_account.py
+    */smtp/*
     */site-packages/*
 
 exclude_lines =
