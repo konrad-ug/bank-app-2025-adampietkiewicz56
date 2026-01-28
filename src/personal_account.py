@@ -37,22 +37,24 @@ class PersonalAccount(Account):
         # potem pobierz opłatę (zapisze "-1.0" w historii)
         self.outgoing_transfer(fee)
 
-    def submit_for_loan(self, amount):
-        def one():
-            return len(self.history) >= 3 and all(float(x) > 0 for x in self.history[-3:])
-                
-        
-        def two():
-            return len(self.history) >= 5 and sum(float(x) for x in self.history[-5:]) > amount
-                
-
-        approved = one() or two()
-
-        if approved:
-            self.balance += amount
-
-        return approved
+    def _has_last_three_deposits(self) -> bool:
+        """Sprawdza czy ostatnie 3 transakcje to wpłaty."""
+        if len(self.history) < 3:
+            return False
+        return all(amount > 0 for amount in self.history[-3:])
     
+    def _has_positive_balance_from_last_five(self, loan_amount: float) -> bool:
+        """Sprawdza czy suma ostatnich 5 transakcji > kwota kredytu."""
+        if len(self.history) < 5:
+            return False
+        return sum(self.history[-5:]) > loan_amount
+    
+    def submit_for_loan(self, amount: float) -> bool:
+        """Składa wniosek o kredyt."""
+        if self._has_last_three_deposits() or self._has_positive_balance_from_last_five(amount):
+            self.balance += amount
+            return True
+        return False
         
 
 

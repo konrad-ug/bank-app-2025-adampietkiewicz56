@@ -10,6 +10,12 @@ class TestExpressTransfers:
         account.express_outgoing_pers(50.0)
         assert account.balance == 49.0
 
+    def test_express_outgoing_pers_insufficient_funds(self):
+        account = PersonalAccount("Alice", "Johnson", "12345678901")
+        account.balance = 40.0
+        account.express_outgoing_pers(50.0)
+        assert account.balance == 40.0  # brak zmiany
+
     def test_express_outgoing_comp(self):
         account = CompanyAccount("Firma", "1234567890")
         account.balance = 100.0
