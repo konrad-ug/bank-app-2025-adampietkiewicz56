@@ -142,11 +142,11 @@ def save_accounts():
 def load_accounts():
     """Ładuje wszystkie konta z MongoDB do registry"""
     try:
-        # Czyścimy obecne konta przed załadowaniem
-        registry._accounts = []
-        
         # Ładujemy z bazy
         accounts = mongo_repo.load_all()
+        
+        # Czyścimy obecne konta przed załadowaniem
+        registry.accounts.clear()
         
         # Dodajemy do registry
         for account in accounts:
