@@ -3,3 +3,4 @@ pytest-cov==7.0.0
 pytest-mock
 flask
 requests
+behave
