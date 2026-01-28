@@ -9,7 +9,7 @@ class Account:
             return
 
         self.balance -= amount
-        self.history.append(f'-{amount}')
+        self.history.append(-amount)
         
     
 
@@ -18,6 +18,6 @@ class Account:
             return
         else:
             self.balance += amount
-            self.history.append(f'{amount}')
+            self.history.append(amount)
 
     
