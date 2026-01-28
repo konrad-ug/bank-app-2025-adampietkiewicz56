@@ -62,3 +62,15 @@ class TestAccountRegistry:
         retrieved = registry_with_accounts.get_account_by_pesel("89092909876")
         assert retrieved == account1
         assert retrieved.first_name == "John"
+<<<<<<< HEAD
+=======
+
+    def test_account_with_pesel_exists_true(self, registry, account1):
+        """Test: sprawdzenie czy PESEL istnieje - pozytywnie"""
+        registry.add_account(account1)
+        assert registry.account_with_pesel_exists("89092909876") is True
+
+    def test_account_with_pesel_exists_false(self, registry):
+        """Test: sprawdzenie czy PESEL istnieje - negatywnie"""
+        assert registry.account_with_pesel_exists("99999999999") is False
+>>>>>>> 468264a (lab8 przed rebase)
