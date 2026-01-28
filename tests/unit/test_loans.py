@@ -1,60 +1,64 @@
+import pytest
 from src.personal_account import PersonalAccount
-from src.account import Account
 
+@pytest.fixture
+def personal_account():
+    """Fixture: Czyste konto osobiste."""
+    return PersonalAccount("Jan", "Kowalski", "12345678901")
 
-class TestLoan:
-    def test_loan_personal_accept_one(self):
-        account = PersonalAccount("Alice", "Johnson", "12345678901")
-        account.balance = 150.0
-        account.incoming_transfer(50.0)
-        account.incoming_transfer(150.0)
-        account.incoming_transfer(250.0)
-        account.submit_for_loan(300.0)
+@pytest.fixture
+def account_with_three_deposits(personal_account):
+    """Fixture: Konto z 3 wpłatami."""
+    personal_account.incoming_transfer(100)
+    personal_account.incoming_transfer(200)
+    personal_account.incoming_transfer(150)
+    return personal_account
 
+@pytest.fixture
+def account_with_five_transactions(personal_account):
+    """Fixture: Konto z 5 transakcjami (mieszane)."""
+    personal_account.incoming_transfer(200)
+    personal_account.outgoing_transfer(50)
+    personal_account.incoming_transfer(300)
+    personal_account.outgoing_transfer(100)
+    personal_account.incoming_transfer(150)
+    return personal_account
 
-        assert account.balance == 900.0
-        assert account.submit_for_loan(300.0) == True
+# Parametryzacja dla pozytywnych scenariuszy
+@pytest.mark.parametrize("loan_amount,expected_balance", [
+    (100, 550),  # 450 + 100
+    (300, 750),  # 450 + 300
+    (50, 500),   # 450 + 50
+])
+def test_loan_approved_last_three_deposits(account_with_three_deposits, loan_amount, expected_balance):
+    """Kredyt przyznany: ostatnie 3 to wpłaty."""
+    result = account_with_three_deposits.submit_for_loan(loan_amount)
+    assert result is True
+    assert account_with_three_deposits.balance == expected_balance
 
-    def test_loan_personal_reject_two(self):
-        account = PersonalAccount("Alice", "Johnson", "12345678901")
-        account.balance = 150.0
-        account.outgoing_transfer(50.0)
-        account.outgoing_transfer(50.0)
-        account.incoming_transfer(50.0)
-        account.submit_for_loan(300.0)
+@pytest.mark.parametrize("loan_amount", [100, 200, 400])
+def test_loan_approved_sum_of_last_five(account_with_five_transactions, loan_amount):
+    """Kredyt przyznany: suma ostatnich 5 > kwota kredytu."""
+    initial_balance = account_with_five_transactions.balance
+    result = account_with_five_transactions.submit_for_loan(loan_amount)
+    assert result is True
+    assert account_with_five_transactions.balance == initial_balance + loan_amount
 
-
-        assert account.balance == 100.0
-        assert account.submit_for_loan(300.0) == False
-
-
-    def test_loan_personal_accept_two(self):
-        account = PersonalAccount("Alice", "Johnson", "12345678901")
-        account.balance = 0.0
-        account.incoming_transfer(100.0)
-        account.incoming_transfer(100.0)
-        account.incoming_transfer(200.0)
-        account.incoming_transfer(200.0)
-        account.outgoing_transfer(100.0)
-
-        account.submit_for_loan(400.0)
-
-
-        assert account.balance == 900.0
-        assert account.submit_for_loan(300.0) == True
-
-    def test_loan_personal_reject_two(self):
-        account = PersonalAccount("Alice", "Johnson", "12345678901")
-        account.balance = 0.0
-        account.incoming_transfer(100.0)
-        account.incoming_transfer(100.0)
-        account.incoming_transfer(200.0)
-        account.incoming_transfer(200.0)
-        account.outgoing_transfer(400.0)
-        account.submit_for_loan(400.0)
-
-
-        assert account.balance == 200
-        assert account.submit_for_loan(300.0) == False
-
-        
+# Parametryzacja dla negatywnych scenariuszy
+@pytest.mark.parametrize("transactions,loan_amount", [
+    ([100, -50, -30], 100),  # ostatnie 3 nie są wpłatami
+    ([100, 50], 500),        # za mało transakcji
+    ([100, 50, 20, -10, 30], 200),  # suma ostatnich 5 (100+50+20-10+30=190) < 200
+])
+def test_loan_rejected(personal_account, transactions, loan_amount):
+    """Kredyt odrzucony: warunki nie spełnione."""
+    for amount in transactions:
+        if amount > 0:
+            personal_account.incoming_transfer(amount)
+        else:
+            personal_account.outgoing_transfer(abs(amount))
+    
+    initial_balance = personal_account.balance
+    result = personal_account.submit_for_loan(loan_amount)
+    assert result is False
+    assert personal_account.balance == initial_balance
